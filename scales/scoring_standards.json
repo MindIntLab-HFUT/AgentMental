@@ -203,5 +203,99 @@
             "3": "重度症状",
             "4": "极重症状"
         }
+    },
+    "GAD-7": {
+        "紧张、焦虑或担忧": {
+            "0": "无",
+            "1": "轻度",
+            "2": "中度",
+            "3": "重度"
+        },
+        "无法停止或控制担忧": {
+            "0": "无",
+            "1": "轻度",
+            "2": "中度",
+            "3": "重度"
+        },
+        "对各种事情担心过多": {
+            "0": "无",
+            "1": "轻度",
+            "2": "中度",
+            "3": "重度"
+        },
+        "很难放松下来": {
+            "0": "无",
+            "1": "轻度",
+            "2": "中度",
+            "3": "重度"
+        },
+        "坐立不安难以平静": {
+            "0": "无",
+            "1": "轻度",
+            "2": "中度",
+            "3": "重度"
+        },
+        "变得容易烦恼或急躁": {
+            "0": "无",
+            "1": "轻度",
+            "2": "中度",
+            "3": "重度"
+        },
+        "感到似乎有可怕的事情要发生": {
+            "0": "无",
+            "1": "轻度",
+            "2": "中度",
+            "3": "重度"
+        }
+    },
+    "PHQ-8": {
+        "Loss of Interest": {
+            "0": "Not bothered at all (or 0-1 day) by little interest or pleasure in doing things over the past two weeks",
+            "1": "Bothered by little interest or pleasure in doing things for several days (or 2-6 days) over the past two weeks",
+            "2": "Bothered by little interest or pleasure in doing things for more than half the days (or 7-11 days) over the past two weeks",
+            "3": "Bothered by little interest or pleasure in doing things nearly every day (or 12-14 days) over the past two weeks"
+        },
+        "Depressed Mood": {
+            "0": "Not bothered at all (or 0-1 day) by feeling down, depressed, or hopeless over the past two weeks",
+            "1": "Bothered by feeling down, depressed, or hopeless for several days (or 2-6 days) over the past two weeks",
+            "2": "Bothered by feeling down, depressed, or hopeless for more than half the days (or 7-11 days) over the past two weeks",
+            "3": "Bothered by feeling down, depressed, or hopeless nearly every day (or 12-14 days) over the past two weeks"
+        },
+        "Sleep Problems": {
+            "0": "Not bothered at all (or 0-1 day) by trouble falling or staying asleep, or sleeping too much over the past two weeks",
+            "1": "Bothered by trouble falling or staying asleep, or sleeping too much for several days (or 2-6 days) over the past two weeks",
+            "2": "Bothered by trouble falling or staying asleep, or sleeping too much for more than half the days (or 7-11 days) over the past two weeks",
+            "3": "Bothered by trouble falling or staying asleep, or sleeping too much nearly every day (or 12-14 days) over the past two weeks"
+        },
+        "Fatigue or Low Energy": {
+            "0": "Not bothered at all (or 0-1 day) by feeling tired or having little energy over the past two weeks",
+            "1": "Bothered by feeling tired or having little energy for several days (or 2-6 days) over the past two weeks",
+            "2": "Bothered by feeling tired or having little energy for more than half the days (or 7-11 days) over the past two weeks",
+            "3": "Bothered by feeling tired or having little energy nearly every day (or 12-14 days) over the past two weeks"
+        },
+        "Appetite or Weight Changes": {
+            "0": "Not bothered at all (or 0-1 day) by poor appetite or overeating over the past two weeks",
+            "1": "Bothered by poor appetite or overeating for several days (or 2-6 days) over the past two weeks",
+            "2": "Bothered by poor appetite or overeating for more than half the days (or 7-11 days) over the past two weeks",
+            "3": "Bothered by poor appetite or overeating nearly every day (or 12-14 days) over the past two weeks"
+        },
+        "Low Self-Worth": {
+            "0": "Not bothered at all (or 0-1 day) by feeling bad about oneself or like a failure over the past two weeks",
+            "1": "Bothered by feeling bad about oneself or like a failure for several days (or 2-6 days) over the past two weeks",
+            "2": "Bothered by feeling bad about oneself or like a failure for more than half the days (or 7-11 days) over the past two weeks",
+            "3": "Bothered by feeling bad about oneself or like a failure nearly every day (or 12-14 days) over the past two weeks"
+        },
+        "Concentration Difficulties": {
+            "0": "Not bothered at all (or 0-1 day) by trouble concentrating on things like reading or watching TV over the past two weeks",
+            "1": "Bothered by trouble concentrating on things like reading or watching TV for several days (or 2-6 days) over the past two weeks",
+            "2": "Bothered by trouble concentrating on things like reading or watching TV for more than half the days (or 7-11 days) over the past two weeks",
+            "3": "Bothered by trouble concentrating on things like reading or watching TV nearly every day (or 12-14 days) over the past two weeks"
+        },
+        "Psychomotor Changes": {
+            "0": "Not bothered at all (or 0-1 day) by moving or speaking slowly, or being fidgety or restless over the past two weeks",
+            "1": "Bothered by moving or speaking slowly, or being fidgety or restless for several days (or 2-6 days) over the past two weeks",
+            "2": "Bothered by moving or speaking slowly, or being fidgety or restless for more than half the days (or 7-11 days) over the past two weeks",
+            "3": "Bothered by moving or speaking slowly, or being fidgety or restless nearly every day (or 12-14 days) over the past two weeks"
+        }
     }
 }

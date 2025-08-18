@@ -1,0 +1,10 @@
+[
+    {
+        "model": "qwen2.5-72b",
+        "api_key": "none",
+        "base_url": "http://localhost:10012/v1/",
+        "api_type": "local",
+        "tags": ["qwen2.5-72b", "local"],
+        "price": [0, 0]
+    }
+]

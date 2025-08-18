@@ -1,0 +1,42 @@
+{
+  "Loss of Interest": [
+    "Over the past two weeks, have you felt little interest or pleasure in doing things?",
+    "Over the past two weeks, have you lost enthusiasm for activities you usually enjoy?",
+    "Over the past two weeks, have you found it hard to get motivated for hobbies or tasks?"
+  ],
+  "Depressed Mood": [
+    "Over the past two weeks, have you felt down, depressed, or hopeless?",
+    "Over the past two weeks, have you experienced persistent sadness?",
+    "Over the past two weeks, have you struggled to feel optimistic or upbeat?"
+  ],
+  "Sleep Problems": [
+    "Over the past two weeks, have you had trouble falling or staying asleep?",
+    "Over the past two weeks, have you felt that your sleep was restless or of poor quality?",
+    "Over the past two weeks, have you woken up too early and been unable to fall back asleep?"
+  ],
+  "Fatigue or Low Energy": [
+    "Over the past two weeks, have you felt tired or lacked energy?",
+    "Over the past two weeks, have you felt exhausted even after resting?",
+    "Over the past two weeks, have you found it hard to carry out tasks due to low energy?"
+  ],
+  "Appetite or Weight Changes": [
+    "Over the past two weeks, have you had a poor appetite or been overeating?",
+    "Over the past two weeks, have you noticed significant weight loss or gain?",
+    "Over the past two weeks, have your eating habits changed due to your mood?"
+  ],
+  "Low Self-Worth": [
+    "Over the past two weeks, have you felt bad about yourself or like a failure?",
+    "Over the past two weeks, have you experienced feelings of guilt or worthlessness?",
+    "Over the past two weeks, have you felt that you’ve let yourself or others down?"
+  ],
+  "Concentration Difficulties": [
+    "Over the past two weeks, have you had trouble concentrating on tasks like reading or working?",
+    "Over the past two weeks, have you felt your mind was foggy or unfocused?",
+    "Over the past two weeks, have you struggled to make decisions due to poor concentration?"
+  ],
+  "Psychomotor Changes": [
+    "Over the past two weeks, have you felt slowed down in your movements or speech?",
+    "Over the past two weeks, have you been so restless that it’s hard to sit still?",
+    "Over the past two weeks, have you noticed agitation or sluggishness in your behavior?"
+  ]
+}

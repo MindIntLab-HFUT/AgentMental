@@ -28,19 +28,14 @@ def load_scoring_standards(file_path="data/scoring_standards.json"):
     return load_json_file(file_path)
 
 
-def load_real_data(file_path: str):
-    """
-    从JSON文件加载真实访谈对话和量表得分数据。
-
-    :param file_path: JSON文件路径
-    :return: (real_interview, hamd_17_scores) 元组
-    """
+def load_real_data(file_path="real_data.json", scale_name="HAMD-17"):
     try:
-        data = load_json_file(file_path)
-        video_name = data.get("video_name", "unknown_video")
-        real_interview = data.get("real_interview", [])
-        hamd_17_scores = data.get("hamd_17_scores", {})
-        return video_name,real_interview, hamd_17_scores
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            identifier = data.get("Participant_ID" if scale_name == "PHQ-8" else "video_name", "unknown_identifier")
+            real_interview = data.get("real_interview", [])
+            scores = data.get("phq8_scores" if scale_name == "PHQ-8" else "hamd_17_scores", {})
+            return identifier, real_interview, scores
     except FileNotFoundError:
         logger.error(f"文件 {file_path} 未找到。")
         sys.exit(1)
