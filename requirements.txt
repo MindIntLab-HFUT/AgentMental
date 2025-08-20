@@ -1,0 +1,8 @@
+openai==1.70.0
+pandas==2.2.3
+autogen==0.7.3
+networkx==3.4.2
+uuid==1.30
+python-dotenv==1.0.1
+pyyaml==6.0.2
+tqdm==4.67.1
