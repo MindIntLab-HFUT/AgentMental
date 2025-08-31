@@ -7,8 +7,11 @@ import logging
 import pandas as pd
 from data_load import load_scoring_standards
 from logging_setup import dialog_print
+from config import get_llm_config
+from autogen.token_count_utils import count_token
 
 logger = logging.getLogger(__name__)
+llm_config = get_llm_config()
 
 
 def parse_personal_info(response):
@@ -68,23 +71,23 @@ def get_valid_input(prompt_text):
             if user_input:
                 return user_input
             else:
-                print("输入不能为空，请重新输入。")
+                print("Empty input, please re-enter.")
         except EOFError:
-            print("\n输入结束。")
+            print("\nInput complete.")
             sys.exit(0)
         except KeyboardInterrupt:
-            print("\n程序中断。")
+            print("\nProgram interrupted.")
             sys.exit(0)
 
 def choose_mode():
-    print("\n请选择运行模式：")
-    print("1. 人工交互模式")
-    print("2. 自动化测试模式")
+    print("\nPlease select a run mode:")
+    print("1. Manual interactive mode")
+    print("2. Automated test mode")
     while True:
-        mode_choice = get_valid_input("请输入选择的模式编号（1或2）： ")
+        mode_choice = get_valid_input("Enter the mode number (1 or 2): ")
         if mode_choice in {"1", "2"}:
             return mode_choice
-        print("无效的选择，请重新输入。")
+        print("Invalid choice, please try again.")
 
 
 def categorize_score(total_score, scale_name):
@@ -142,10 +145,10 @@ def extract_score_and_summary(text, scale_name):
         if isinstance(score, int) and 0 <= score <= max_score:
             return score, summary
         else:
-            print("评分不在有效范围内，默认评分为0。")
+            print("Score is out of valid range; defaulting to 0.")
             return 0, summary
     except json.JSONDecodeError:
-        print("无法解析评分智能体的输出，请确保其遵循JSON格式。")
+        print("Unable to parse the scoring agent's output. Please ensure it follows JSON format.")
         return 0, ""
 
 
@@ -172,13 +175,13 @@ def extract_summary_and_updated_scores(text, scale_name):
                 if isinstance(score, int) and 0 <= score <= max_score:
                     valid_updated_scores[topic] = {"score": score, "reason": reason}
                 else:
-                    print(f"无效的更新分数：主题='{topic}', 分数='{score}'")
+                    print(f"Invalid updated score: topic='{topic}', score='{score}'")
             else:
-                print(f"无效的 updated_scores 格式：主题='{topic}', 数据='{score_data}'")
+                print(f"Invalid format in updated_scores: topic='{topic}', data='{score_data}'")
 
         return summary, valid_updated_scores
     except json.JSONDecodeError:
-        print("无法解析 SummaryAgent 的输出，请确保其遵循JSON格式。")
+        print("Unable to parse SummaryAgent's output. Please ensure it follows JSON format.")
         return "", {}
 
 
@@ -248,27 +251,54 @@ def suppress_output():
             sys.stderr = old_stderr
 
 
-def makerequest(agent, prompt):
+def makerequest(group_chat_manager, user_proxy, agent, prompt):
+    full_prompt = f"Next speaker: {agent.name}\n{prompt}"
+    logger.info(f"Prompt sent to {agent.name}: {full_prompt}")
+
+    MODEL_MAX_CONTEXT = 32768
+    MAX_COMPLETION_TOKENS = llm_config.get("max_tokens", 4096)
+    SAFETY_BUFFER = 4096  
+    TOKEN_THRESHOLD = MODEL_MAX_CONTEXT - MAX_COMPLETION_TOKENS - SAFETY_BUFFER
+
+    messages_to_send = group_chat_manager.groupchat.messages
+    current_messages_tokens = count_token(messages_to_send)
+    current_prompt_tokens = count_token(full_prompt)
+    current_tokens = current_messages_tokens + current_prompt_tokens
+    
+    while current_tokens > TOKEN_THRESHOLD:
+        if len(messages_to_send) > 1:
+            removed_message = messages_to_send.pop(0)
+            current_tokens = count_token(messages_to_send) + current_prompt_tokens
+            logger.warning(f"Message history too long; removed one old message. Current tokens: {current_tokens}, threshold: {TOKEN_THRESHOLD}")
+        else:
+            logger.error("Message history contains only one message but still exceeds token threshold, unable to trim further.")
+            break
+    for ag in group_chat_manager.groupchat.agents:
+        ag.chat_messages[group_chat_manager] = group_chat_manager.groupchat.messages
 
     try:
-        logger.info(f"向{agent.name}发送消息：{prompt}")
         with suppress_output():
-            response = agent.initiate_chat(
-                recipient=agent,
-                message=prompt,
-                max_turns=1
+            response = user_proxy.initiate_chat(
+                group_chat_manager,
+                message=full_prompt,
+                max_turns=1,
+                clear_history=False
             )
-        response_text = response.chat_history[-1]["content"].strip()
-        logger.info(f"{agent.name}的响应：{response_text}")
+        # print(response.chat_history)
+        original_response_text = response.chat_history[-1]["content"].strip()
+        logger.info(f"Raw response from {agent.name}: {original_response_text}")
         
-        think_index = response_text.find("</think>")
+        think_index = original_response_text.find("</think>")
         if think_index != -1:
-            response_text = response_text[think_index + len("</think>") :].strip()
-
-        return response_text
+            processed_response_text = original_response_text[think_index + len("</think>"):].strip()
+        else:
+            processed_response_text = original_response_text
+        logger.info(f"Processed response from {agent.name}: {processed_response_text}")
+        group_chat_manager.groupchat.messages[-1]["content"] = processed_response_text
+        return processed_response_text
     
     except Exception as e:
-        logger.exception(f"调用{agent.name}时发生错误：%s", e)
+        logger.exception(f"Error while calling {agent.name}: %s", e)
         return None
     
 
@@ -292,90 +322,22 @@ def is_necessary(necessity_score, asked_questions):
         return False
     
 
-def generate_mock_response(question, topic, profile, identification, real_interview, scale_scores, scoring_standard=None, current_topic_history=None, depth=0, clear_memory=False, scale_name="PHQ-8"):
-    profile_str = json.dumps(profile, indent=2, ensure_ascii=False)
-    interview_history = ""
-    for para in real_interview:
-        role = para.get("roleName", "Unknown role")
-        content = para.get("content", "")
-        interview_history += f"{role}: {content}\n"
-
-    if clear_memory:
-        prompt = "Please forget all previous conversation content and start a new session. Limit your response to 10 words."
-        logger.info("Clearing API's conversation memory...")
-
-    elif identification == "":
-        prompt = f"""Please answer the following question:\n{question}\n
-Please provide your basic information (age, gender, occupation) in the format 'age:<age>, gender:<gender>, occupation:<occupation>' (e.g., age:25, gender:male, occupation:engineer).
-Ensure the response is concise and follows the requested format without adding anything else.\n
-"""
-        logger.info(f"生成模拟回复的提示：{prompt}")
-    else:
-        if depth == 0:
-            prompt = f"""Please answer the following question:\n{question}\nPlease provide a truthful and reasonable answer based on your real interview dialogue and your profile, with no more than 50 words:"""
-        else:
-            topic_history_str = ""
-            if current_topic_history:
-                for qa in current_topic_history:
-                    topic_history_str += f"BingTang's Question: {qa['question']}\nUser's Response: {qa['response']}\n"
-            prompt = f"""Please answer the following in-depth question:\n{question}\n
-Please provide a truthful and reasonable answer based on your profile, the interview dialogue and all your previous responses. Do not fabricate symptom situations in your response.
-When the question content exceeds the scope of the interview dialogue and cannot be accurately answered, you may choose to answer 'not sure' or a similar expression, but use it sparingly and provide a reason that fits the patient's information.
-Limit your response to 50 words.
-"""
-        logger.info(f"生成模拟回复的提示：{prompt}")
-    try:
-        from openai import OpenAI
-        client = OpenAI(
-            base_url="",
-            api_key=""
-        )
-
-        system_prompt = f"""You are speaking with a psychological assistant named 'BingTang', and you are the client in this conversation with the following personal information and previous interview dialogue:
-{profile_str}\n
-{interview_history}
-
-You should follow the provided information to act as a client in the conversation. Your responses should be coherent and avoid repeating previous utterances.
-Your response should ONLY include what the Client should say, in a natural, first-person tone.
-""" 
-        completion = client.chat.completions.create(
-            model="deepseek-r1-distill-qwen-32b",
-            messages=[
-                {"role": "system", "content": system_prompt}, 
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0
-        )
-        response = completion.choices[0].message.content
-        logger.info(f"生成的模拟回复：{response}")
-
-        think_index = response.find("</think>")
-        if think_index != -1:
-            response = response[think_index + len("</think>") :].strip()
-        return response
-    except Exception as e:
-        logger.exception(f"调用 OpenAI API 生成回复时发生错误：{e}")
-        return "抱歉，我现在无法回答这个问题。"
-
-
-
 def save_assessment_results(identifier, overall_score, symptom_level, updated_scores, csv_file="depression.csv", scale_name="HAMD-17"):
     data = {
         "identifier": identifier,
         "classes": symptom_level,
         "total": overall_score
     }
-
     score_values = {topic: details["score"] for topic, details in updated_scores.items()}
     max_items = 17 if scale_name == "HAMD-17" else 8 if scale_name == "PHQ-8" else 14
     for idx, (topic, score) in enumerate(score_values.items(), 1):
         item_key = f"item{idx}"
         data[item_key] = score
-
     for i in range(1, max_items + 1):
         item_key = f"item{i}"
         if item_key not in data:
-            data[item_key] = 0  
+            data[item_key] = 0 
+
     if os.path.isfile(csv_file):
         try:
             df = pd.read_csv(csv_file, encoding='utf-8')
@@ -383,13 +345,13 @@ def save_assessment_results(identifier, overall_score, symptom_level, updated_sc
                 index = df.index[df['identifier'] == identifier].tolist()[0]
                 for key, value in data.items():
                     df.at[index, key] = value
-                logger.info(f"已更新 {identifier} 的评估结果。")
+                logger.info(f"Updated evaluation results for {identifier}.")
             else:
                 df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
-                logger.info(f"已追加 {identifier} 的评估结果。")
+                logger.info(f"Appended evaluation results for {identifier}.")
         except Exception as e:
-            logger.error(f"读取CSV文件 {csv_file} 时发生错误：{e}")
-            print(f"读取CSV文件时发生错误，请检查日志。")
+            logger.error(f"Error reading CSV file {csv_file}: {e}")
+            print("Error reading CSV file; please check the logs.")
             return
     else:
         columns = ["identifier", "total", "classes"] + [f"item{i}" for i in range(1, max_items + 1)]
@@ -397,20 +359,19 @@ def save_assessment_results(identifier, overall_score, symptom_level, updated_sc
         logger.info(f"已创建新的CSV文件 {csv_file} 并保存评估结果。")
     try:
         df.to_csv(csv_file, index=False, encoding='utf-8')
-        logger.info(f"评估结果已保存到 {csv_file}")
+        logger.info(f"Evaluation results saved to {csv_file}")
     except Exception as e:
-        logger.error(f"保存CSV文件 {csv_file} 时发生错误：{e}")
-        print(f"保存CSV文件时发生错误，请检查日志。")
+        logger.error(f"Error saving CSV file {csv_file}: {e}")
+        print("Error saving CSV file; please check the logs.")
 
 def is_file_already_evaluated(identifier, csv_file_path):
     if not os.path.isfile(csv_file_path):
         return False  
-
     try:
         df = pd.read_csv(csv_file_path, encoding='utf-8')
         normalized_identifiers = df['identifier'].astype(str).str.strip()
         return str(identifier).strip() in normalized_identifiers.values
     except Exception as e:
-        logger.error(f"检查CSV文件 {csv_file_path} 时发生错误：{e}")
+        logger.error(f"Error checking CSV file {csv_file_path}: {e}")
         return False  
 

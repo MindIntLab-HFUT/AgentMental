@@ -3,23 +3,21 @@ import logging
 import autogen
 import json
 import os
-from utils import get_valid_input, categorize_score, extract_score_and_summary, extract_summary_and_updated_scores, generate_score_table, is_necessary, makerequest, generate_mock_response, parse_personal_info, extract_score, save_assessment_results, is_file_already_evaluated, custom_speaker_selection_func, generate_report
+from utils import get_valid_input, categorize_score, extract_score_and_summary, extract_summary_and_updated_scores, generate_score_table, is_necessary, makerequest, parse_personal_info, extract_score, save_assessment_results, is_file_already_evaluated, custom_speaker_selection_func, generate_report
 from agents import setup_agents
 from data_load import load_real_data
 from logging_setup import dialog_print
 from config import get_llm_config
 from memory import MemoryGraph
-
+from generate_response import generate_mock_response
 
 llm_config = get_llm_config()
-
-
 logger = logging.getLogger(__name__)
 
 
 def perform_assessment(topics, chatprompt, agents, scale_name, scoring_standards, real_interview, scale_scores, automated=False):
     try:
-        logger.info("开始执行心理评估任务。")
+        logger.info("Starting psychological assessment task.")
         question_agent, scoring_agent, necessity_agent, summary_agent, user_proxy = agents
         groupchat = autogen.GroupChat(
             agents=[question_agent, scoring_agent, necessity_agent, summary_agent, user_proxy],
@@ -32,50 +30,46 @@ def perform_assessment(topics, chatprompt, agents, scale_name, scoring_standards
         total_history = []
         scores = []
         identification = ""
-        last_topic = "基本信息收集"
+        last_topic = "Basic Information Collection"
         last_question = ""
         last_response = ""
         qa_count = 0
-
-
         groupchat.reset()  
 
         initial_message = (
             f"Hello, I am your dedicated psychological assistant. I will conduct an interview with you based on {scale_name} to assess the severity of related symptoms. Please note that this is only a preliminary screening and cannot replace formal psychiatric diagnosis and treatment. "
             "First, for the accuracy of the assessment, I would like to collect your basic information: age, gender, occupation. If you're ready, let's begin."
         )
-        dialog_print(f"冰糖提问: {initial_message}")
-        logger.info(f"发送初始消息：{initial_message}")
-        logger.info("初始消息已发送给用户。")
+        dialog_print(f"Question: {initial_message}")
+        logger.info(f"Initial message sent: {initial_message}")
+        logger.info("Initial message has been delivered to the user.")
 
         if automated:
             user_response = generate_mock_response(initial_message, topic=None, identification="", real_interview=real_interview, scale_scores=scale_scores, 
                                                    scoring_standard=None, current_topic_history=None, scale_name=scale_name)
-            dialog_print(f"模拟回答：{user_response}")
+            dialog_print(f"Simulated answer: {user_response}")
             age, gender, occupation = parse_personal_info(user_response)
             if age is None or gender is None or occupation is None:
-                logger.error("自动化模式下，无法正确解析基本信息。")
-                return "自动化模式下，无法正确解析基本信息。"
+                logger.error("Unable to parse basic information in automated mode.")
+                return "Unable to parse basic information in automated mode."
         else:
             while True:
                 user_response = get_valid_input("Your response (e.g., 25, male, engineer or age:25, gender:male, occupation:engineer): ")
                 age, gender, occupation = parse_personal_info(user_response)
                 if age is not None and gender is not None and occupation is not None:
-                    logger.info(f"成功解析用户基本信息：年龄={age}, 性别={gender}, 职业={occupation}")
+                    logger.info(f"Successfully parsed user basic information: age={age}, gender={gender}, occupation={occupation}")
                     break
                 else:
                     missing_fields = []
                     if age is None:
-                        missing_fields.append("年龄")
+                        missing_fields.append("Age")
                     if gender is None:
-                        missing_fields.append("性别")
+                        missing_fields.append("Gender")
                     if occupation is None:
-                        missing_fields.append("职业")
-                    dialog_print(
-                        f"无法解析您的输入，请确保包含以下信息：{', '.join(missing_fields)}，且使用逗号、顿号、空格或关键词分隔（例如：25，男，工程师 或 年龄:25, 性别:男, 职业:工程师 或 25 男 工程师）")
-
+                        missing_fields.append("Occupation")
+                    dialog_print(f"Unable to parse your input. Please ensure it includes the following information: {', '.join(missing_fields)}. Separate items with commas, commas in Chinese enumeration, spaces, or keywords (e.g., 25, male, engineer or age:25, gender:male, occupation:engineer or 25 male engineer).")
         identification = f"Age: {age}, Gender: {gender}, Occupation: {occupation}"
-        print(f"\n用户基本信息：{identification}")
+        print(f"\nBasic information: {identification}")
 
         memory_graph = MemoryGraph(identification)
         total_history.append({"role": "system", "content": identification})
@@ -84,11 +78,10 @@ def perform_assessment(topics, chatprompt, agents, scale_name, scoring_standards
 
         for idx, topic in enumerate(topics, 1):
             dialog_print("\n")
-            logger.info(f"开始处理主题 {idx}/{len(topics)}：{topic}")
-            dialog_print(f"{'-'*20}当前主题: {topic}")
+            logger.info(f"Starting topic {idx}/{len(topics)}: {topic}")
+            dialog_print(f"{'-'*20}Current Topic: {topic}")
 
             memory_graph.add_topic(topic)
-
             asked_questions = 0
             depth = 0
             max_depth = 3
@@ -108,23 +101,22 @@ def perform_assessment(topics, chatprompt, agents, scale_name, scoring_standards
                     f"Last Response: {last_response}\n"
                     f"Memory: {memory_context_str}\n"
                     f"Other Topics: {other_topics_str}\n"
-                    f"Examples:\n{example_questions_str}"
                 )
-                question = makerequest(group_chat_manager, user_proxy, question_agent, question_payload)                
+                question = makerequest(group_chat_manager, user_proxy, question_agent, question_payload)
+                # print(groupchat.messages)
                 if question is None:
-                    question = "抱歉，我现在无法生成问题。"
-
-                dialog_print(f"冰糖提问: {question}")
-                logger.info(f"冰糖提问: {question}")
+                    question = "Sorry, I cannot generate a question at the moment."
+                dialog_print(f"Question: {question}")
+                logger.info(f"Question: {question}")
                 
                 if automated:
                     current_scoring_standard = scoring_standards[scale_name][topic]
                     response = generate_mock_response(question, topic, identification, real_interview, scale_scores, scoring_standard=current_scoring_standard, 
                                                       current_topic_history=current_topic_history, depth=depth, scale_name=scale_name)
-                    dialog_print(f"\n模拟回答：{response}")
+                    dialog_print(f"\nSimulated answer: {response}")
                 else:
-                    response = get_valid_input("\n您的回答: ")
-                logger.info(f"用户回答：{response}")
+                    response = get_valid_input("\nAnswer: ")
+                logger.info(f"User's response: {response}")
                 scores.append({"topic": topic, "question": question, "response": response})
 
                 group_chat_manager.groupchat.messages.append({
@@ -134,7 +126,6 @@ def perform_assessment(topics, chatprompt, agents, scale_name, scoring_standards
                 })
 
                 qa_count += 1
-
                 total_history.append({"role": "assistant", "content": question})
                 total_history.append({"role": "user", "content": response})
                 current_topic_history.append({"question": question, "response": response})
@@ -155,21 +146,25 @@ def perform_assessment(topics, chatprompt, agents, scale_name, scoring_standards
                     pass
                 else:
                     break
+
             topic_history_str = "\n".join([f"Q: {qa['question']}\nA: {qa['response']}" for qa in current_topic_history])
             scoring_standard_str = json.dumps(scoring_standards[scale_name][topic], ensure_ascii=False, indent=2)
             scoring_payload = f"Topic: {topic}\nHistory:\n{topic_history_str}\nStandard:\n{scoring_standard_str}"
             total_score_text = makerequest(group_chat_manager, user_proxy, scoring_agent, scoring_payload)
+
             if total_score_text is not None:
                 total_score, summary = extract_score_and_summary(total_score_text, scale_name)
             else:
                 total_score, summary = 0, ""
-            dialog_print(f"\n主题'{topic}'的总评分: {total_score} 分")
+
+            dialog_print(f"\nTotal score for topic '{topic}': {total_score} points")
             if summary:
-                dialog_print(f"得分依据: {summary}\n")
+                dialog_print(f"Scoring basis: {summary}\n")
             else:
                 print()
             scores.append({"topic": topic, "question": "Total score", "response": "", "score": total_score})
             memory_graph.convert_topic_to_long_term(topic, total_score, summary)
+
         total_history_str = "\n".join(
             f"{turn['role']}: {turn['content']}" for turn in total_history
         )
@@ -191,16 +186,16 @@ def perform_assessment(topics, chatprompt, agents, scale_name, scoring_standards
             summary, updated_scores = "", {}
 
         if updated_scores:
-            dialog_print("\n--- 分数调整 ---")
+            dialog_print("\n--- Score Adjustments ---")
             for topic, details in updated_scores.items():
                 score = details["score"]
                 reason = details["reason"]
                 memory_graph.update_topic_score(topic, score, reason)
-                dialog_print(f"主题'{topic}'的分数已更新为: {score} 分，理由是：{reason}")
-                logger.info(f"主题'{topic}'的分数已更新： -> {score} 分，理由是：{reason}")
+                dialog_print(f"Score for topic '{topic}' updated to: {score} points (reason: {reason})")
+                logger.info(f"Score for topic '{topic}' updated: -> {score} points (reason: {reason})")
         else:
-            logger.warning("未收到更新后的分数。")
-            dialog_print("\n所有主题分数均未调整。")
+            logger.warning("No updated scores received.")
+            dialog_print("\nNo topic scores were adjusted.")
 
         overall_score = 0
         for topic in topics:
@@ -209,43 +204,41 @@ def perform_assessment(topics, chatprompt, agents, scale_name, scoring_standards
                 if attrs.get('status') == 'completed':
                     score_to_use = attrs.get('updated_score') if attrs.get('updated_score') is not None else attrs.get('score', 0)
                     if score_to_use is None:
-                        logger.warning(f"主题 '{topic}' 的 score_to_use 为 None，使用默认值 0")
+                        logger.warning(f"Score_to_use for topic '{topic}' is None; defaulting to 0")
                         score_to_use = 0
-                    overall_score += score_to_use            
+                    overall_score += score_to_use
+                    
         symptom_level = categorize_score(overall_score, scale_name)
-        logger.info(f"总评分：{overall_score}，症状等级：{symptom_level}")
+        logger.info(f"Overall score: {overall_score}, symptom level: {symptom_level}")
         report_table = generate_score_table(memory_graph, topics, symptom_level)
-        logger.info("生成得分表格完成。")
+        logger.info("Score table generation complete.")
 
         final_report = generate_report(report_table, summary, scale_name)
         if final_report is None:
-            final_report = "抱歉，无法生成报告。"
-        logger.info("评估任务完成。")
-        dialog_print(f"\n本次Q&A数量：{qa_count}")
+            final_report = "Sorry, the report could not be generated."
+        logger.info("Assessment task completed.")
+        dialog_print(f"\nNumber of Q&As in this session: {qa_count}")
         return final_report, overall_score, symptom_level, updated_scores
-
     except Exception as e:
-        logger.exception("执行评估任务时发生未知错误：%s", e)
-        return "抱歉，评估过程中发生了错误。"
-
-
+        logger.exception("An unknown error occurred while executing the assessment task: %s", e)
+        return "Sorry, an error occurred during the assessment."
 
 
 def process_single_file(file_path, scoring_standards, chatprompt, selected_scale, mode_choice, csv_file_path, automated=False):
     try:
         identifier = os.path.splitext(os.path.basename(file_path))[0] 
         if is_file_already_evaluated(identifier, csv_file_path):
-            logger.info(f"文件 {file_path} 已经评估过，跳过。")
-            dialog_print(f"文件 {file_path} 已经评估过，跳过。")
+            logger.info(f"File {file_path} has already been evaluated—skipped.")
+            dialog_print(f"File {file_path} has already been evaluated—skipped.")
             return 
-        logger.info(f"开始处理文件：{file_path}")
-        dialog_print(f"\n{'='*50}\n开始处理文件：{file_path}\n{'='*50}\n")
+        logger.info(f"Starting to process file: {file_path}")
+        dialog_print(f"\n{'='*50}\nStarting to process file: {file_path}\n{'='*50}\n")
         identifier, real_interview, scores = load_real_data(file_path, selected_scale)
         agents = setup_agents(chatprompt)
         if automated:
             clear_memory_response = generate_mock_response("", topic=None, identification="", real_interview=[], scale_scores={}, clear_memory=True, scoring_standard=None, current_topic_history=None)
-            logger.info(f"API清除记忆的响应：{clear_memory_response}")
-            dialog_print("\n已清除API的对话记忆，准备处理当前文件。\n")
+            logger.info(f"API clear-memory response: {clear_memory_response}")
+            dialog_print("\nConversation memory cleared; ready to process current file.\n")
 
         final_report, overall_score, symptom_level, updated_scores = perform_assessment(
             topics=list(chatprompt.keys()),
@@ -266,18 +259,18 @@ def process_single_file(file_path, scoring_standards, chatprompt, selected_scale
             csv_file=csv_file_path,
             scale_name=selected_scale
         )
-        logger.info(f"评估结果已保存到 {csv_file_path}")
-        dialog_print(f"评估结果已保存到 {csv_file_path}")
+        logger.info(f"Assessment results saved to {csv_file_path}")
+        dialog_print(f"Assessment results saved to {csv_file_path}")
 
         if mode_choice == "2":
-            dialog_print("\n自动化测试完成，生成的心理评估报告如下：\n")
+            dialog_print("\nAutomated test completed. Psychological screening report:\n")
         else:
-            dialog_print(
-                "\n感谢你的真诚配合，接下来我将为您输出一份心理初筛报告。结果仅供参考，不作为医学诊断依据。生成报告可能需要较长时间，请稍等。\n")
+            dialog_print("\nThank you for your candid participation. Below is your preliminary psychological screening report. "
+                "The results are for reference only and do not constitute a medical diagnosis. Generating the report may take a while—please wait.\n")
         dialog_print(final_report)
-        logger.info("心理评估报告已输出给用户。程序结束。")
+        logger.info("Psychological assessment report delivered; program ended.")
 
     except Exception as e:
-        logger.exception(f"处理文件 {file_path} 时发生错误：{e}")
-        dialog_print(f"处理文件 {file_path} 时发生错误，请查看日志获取详细信息。")
+        logger.exception(f"Error processing file {file_path}: {e}")
+        dialog_print(f"Error processing file {file_path}; check logs for details.")
 
