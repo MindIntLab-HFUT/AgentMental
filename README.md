@@ -39,5 +39,7 @@ Download the dataset
 Data processing
 ```bash
 ~$ python data_process.py
+~$ python extract_data.py
 ```
+
 
