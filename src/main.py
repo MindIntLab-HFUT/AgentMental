@@ -15,7 +15,7 @@ if __name__ == "__main__":
     logger.info("Psychological assessment program started.")
 
     # data_dir = "data/depression_data_111"
-    data_dir = "/data/wangao/psyscale/otherdataset/processed_train_daic_woz"
+    data_dir = "../data/processed_train_daic_woz"
     if not os.path.exists(data_dir):
         logger.error(f"Data folder {data_dir} does not exist.")
         dialog_print(f"Error: Data folder {data_dir} does not exist.")

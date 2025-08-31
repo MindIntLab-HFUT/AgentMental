@@ -22,7 +22,7 @@ Install the required packages:
 ~$ pip install -r requirements.txt
 ```
 
-Replace your model, base_url and api_key with your actual model, base_url and API keys. It can be placed in the OAI_CONFIG_LIST.
+Replace your model, base_url and api_key with your actual model, base_url and API keys in files ```OAI_CONFIG_LIST, generate_response.py, memory.py```.
 
 Run
 ```bash
@@ -40,6 +40,23 @@ Data processing
 ```bash
 ~$ python data_process.py
 ~$ python extract_data.py
+```
+
+Your directory structure should look like this:
+```
+AgentMental/
+├── data/
+│   ├── data_download.py
+│   ├── data_process.py
+│   ├── extract_data.py
+│   ├── processed_train_daic_woz
+│   └── ... (other dataset files)
+├── evaluation
+├── scales
+├── src
+├── result.py
+├── requirements.txt
+└── README.md
 ```
 
 

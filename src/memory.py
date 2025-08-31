@@ -3,8 +3,12 @@ import uuid
 from openai import OpenAI
 import json
 import logging
+import os
 
 logger = logging.getLogger(__name__)
+base_url = os.getenv("API_BASE_URL", "http://localhost:10012/v1/")
+api_key = os.getenv("API_KEY", "none")
+model_name = os.genenv("API_MODEL", "qwen2.5-72b")
 
 class MemoryGraph:
     def __init__(self, user_identification):
@@ -14,8 +18,8 @@ class MemoryGraph:
         logger.info(f"MemoryGraph initialized for user: {user_identification}")
         
         self.client = OpenAI(
-            base_url="http://localhost:10012/v1/", 
-            api_key="none"
+            base_url=base_url, 
+            api_key=api_key
         )
 
     def add_topic(self, topic_name):
@@ -73,7 +77,7 @@ Output:
 """
         try:
             completion = self.client.chat.completions.create(
-                model="qwen2.5-72b",
+                model=model_name,
                 messages=[
                     {"role": "system", "content": "You are a psychological assessment assistant. Extract key information strictly as instructed and return JSON."},
                     {"role": "user", "content": prompt}
@@ -207,7 +211,7 @@ Provide a strict JSON response with a single key "results", which is a list of o
 """
         try:
             completion = self.client.chat.completions.create(
-                model="qwen2.5-72b",
+                model=model_name,
                 messages=[
                     {"role": "system", "content": "You are a senior clinical psychologist performing a file review. Output your findings in the specified JSON format only."},
                     {"role": "user", "content": holistic_reassessment_prompt}
