@@ -78,5 +78,5 @@ Your response should ONLY include what the Client should say, in a natural, firs
         return response
 
     except Exception as e:
-        ogger.exception(f"Error while calling API to generate reply: {e}")
+        logger.exception(f"Error while calling API to generate reply: {e}")
         return "Sorry, I cannot answer this question at the moment."
