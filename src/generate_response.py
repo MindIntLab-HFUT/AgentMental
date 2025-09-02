@@ -11,7 +11,7 @@ from logging_setup import dialog_print
 logger = logging.getLogger(__name__)
 base_url = os.getenv("API_BASE_URL", "http://localhost:10010/v1/")
 api_key = os.getenv("API_KEY", "none")
-model_name = os.genenv("API_MODEL", "deepseek-r1-32b")
+model_name = os.getenv("API_MODEL", "deepseek-r1-32b")
 
 
 def generate_mock_response(question, topic, identification, real_interview, scale_scores, scoring_standard=None, current_topic_history=None, depth=0, clear_memory=False, scale_name="PHQ-8"):

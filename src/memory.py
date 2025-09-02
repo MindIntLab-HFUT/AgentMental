@@ -8,7 +8,7 @@ import os
 logger = logging.getLogger(__name__)
 base_url = os.getenv("API_BASE_URL", "http://localhost:10012/v1/")
 api_key = os.getenv("API_KEY", "none")
-model_name = os.genenv("API_MODEL", "qwen2.5-72b")
+model_name = os.getenv("API_MODEL", "qwen2.5-72b")
 
 class MemoryGraph:
     def __init__(self, user_identification):
