@@ -257,8 +257,8 @@ def makerequest(group_chat_manager, user_proxy, agent, prompt):
 
     MODEL_MAX_CONTEXT = 32768
     MAX_COMPLETION_TOKENS = llm_config.get("max_tokens", 4096)
-    SAFETY_BUFFER = 4096  
-    TOKEN_THRESHOLD = MODEL_MAX_CONTEXT - MAX_COMPLETION_TOKENS - SAFETY_BUFFER
+    SAFETY_BUFFER = 8192 
+    TOKEN_THRESHOLD = MODEL_MAX_CONTEXT - MAX_COMPLETION_TOKENS - SAFETY_BUFFER - 4096
 
     messages_to_send = group_chat_manager.groupchat.messages
     current_messages_tokens = count_token(messages_to_send)

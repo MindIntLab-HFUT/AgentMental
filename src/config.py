@@ -12,7 +12,7 @@ def get_llm_config():
         "config_list": config_list,
         "cache_seed": 101,
         "temperature": 0,
-        "max_tokens": 4096
+        "max_tokens": 2048
     }
     
     return llm_config
