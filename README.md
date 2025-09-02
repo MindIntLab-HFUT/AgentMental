@@ -38,8 +38,8 @@ Download the dataset
 
 Data processing
 ```bash
-~$ python data_process.py
 ~$ python extract_data.py
+~$ python data_process.py
 ```
 
 Your directory structure should look like this:
