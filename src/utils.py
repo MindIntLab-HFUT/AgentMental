@@ -91,27 +91,7 @@ def choose_mode():
 
 
 def categorize_score(total_score, scale_name):
-    if scale_name == "HAMA":
-        if total_score >= 29:
-            return "严重有焦虑"
-        elif total_score >= 21:
-            return "明显有焦虑"
-        elif total_score >= 14:
-            return "肯定有焦虑"
-        elif total_score >= 7:
-            return "可能有焦虑症"
-        else:
-            return "无焦虑"
-    elif scale_name == "HAMD-17":
-        if total_score > 24:
-            return "严重抑郁症"
-        elif total_score >= 17:
-            return "肯定有抑郁症"
-        elif total_score >= 7:
-            return "可能有抑郁症"
-        else:
-            return "正常"
-    elif scale_name == "PHQ-8":
+    if scale_name == "PHQ-8":
         if total_score >= 10:
             return 1  
         else:
@@ -322,14 +302,14 @@ def is_necessary(necessity_score, asked_questions):
         return False
     
 
-def save_assessment_results(identifier, overall_score, symptom_level, updated_scores, csv_file="depression.csv", scale_name="HAMD-17"):
+def save_assessment_results(identifier, overall_score, symptom_level, updated_scores, csv_file="depression.csv", scale_name="PHQ-8"):
     data = {
         "identifier": identifier,
         "classes": symptom_level,
         "total": overall_score
     }
     score_values = {topic: details["score"] for topic, details in updated_scores.items()}
-    max_items = 17 if scale_name == "HAMD-17" else 8 if scale_name == "PHQ-8" else 14
+    max_items = 8
     for idx, (topic, score) in enumerate(score_values.items(), 1):
         item_key = f"item{idx}"
         data[item_key] = score
@@ -356,7 +336,7 @@ def save_assessment_results(identifier, overall_score, symptom_level, updated_sc
     else:
         columns = ["identifier", "total", "classes"] + [f"item{i}" for i in range(1, max_items + 1)]
         df = pd.DataFrame([data], columns=columns)
-        logger.info(f"已创建新的CSV文件 {csv_file} 并保存评估结果。")
+        logger.info(f"A new CSV file {csv_file} has been created and the evaluation results have been saved.")
     try:
         df.to_csv(csv_file, index=False, encoding='utf-8')
         logger.info(f"Evaluation results saved to {csv_file}")

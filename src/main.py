@@ -14,7 +14,6 @@ if __name__ == "__main__":
     initialize_dialog_log()
     logger.info("Psychological assessment program started.")
 
-    # data_dir = "data/depression_data_111"
     data_dir = "../data/processed_train_daic_woz"
     if not os.path.exists(data_dir):
         logger.error(f"Data folder {data_dir} does not exist.")
@@ -49,11 +48,7 @@ if __name__ == "__main__":
     logger.info(f"Selected scale: {selected_scale}")
     dialog_print(f"You selected scale: {selected_scale}")
 
-    if selected_scale == "HAMA":
-        chatprompt = load_chatprompt("HAMA.json")
-    elif selected_scale == "HAMD-17":
-        chatprompt = load_chatprompt("HAMD-17.json")
-    elif selected_scale == "PHQ-8":
+    if selected_scale == "PHQ-8":
         chatprompt = load_chatprompt("../scales/PHQ-8.json")
     else:
         dialog_print("Unsupported scale type.")

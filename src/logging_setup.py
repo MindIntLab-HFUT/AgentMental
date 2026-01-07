@@ -16,7 +16,7 @@ def setup_logging(log_dir='logs'):
     log_file = os.path.join(log_path, log_filename)
 
     logging.basicConfig(
-        level=logging.INFO,  # 日志级别DEBUG < INFO < WARNING < ERROR < CRITICAL
+        level=logging.INFO,  
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
             logging.FileHandler(log_file, encoding='utf-8')
@@ -24,7 +24,7 @@ def setup_logging(log_dir='logs'):
     )
 
     logger = logging.getLogger()
-    logger.info("日志系统已初始化。")
+    logger.info("The log system has been initialized.")
     return logger
 
 def initialize_dialog_log(log_dir='dialog_logs'):
@@ -36,11 +36,11 @@ def initialize_dialog_log(log_dir='dialog_logs'):
     if not os.path.exists(log_path):
         os.makedirs(log_path)
 
-    log_filename = datetime.now().strftime("dialog_72b_%Y%m%d_%H%M%S.txt")
+    log_filename = datetime.now().strftime("dialog_model_%Y%m%d_%H%M%S.txt")
     log_file = os.path.join(log_path, log_filename)
 
     dialog_log_file = open(log_file, 'w', encoding='utf-8')
-    print(f"对话日志系统已初始化，日志文件：{log_file}")
+    print(f"The dialogue log system has been initialized. Log file: {log_file}")
 
 def dialog_print(text):
     print(text)  
