@@ -5,7 +5,7 @@ import time
 import concurrent.futures
 from urllib.parse import urljoin
 
-URL = "https://dcapswoz.ict.usc.edu/wwwdaicwoz/"
+URL = "Dataset URL HERE"  # Please obtain the url for the dataset through authorization
 
 OUTPUT_DIR = "daic_woz_dataset"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
