@@ -5,10 +5,10 @@ import zipfile
 import shutil
 
 # Configuration parameters
-TEST_CSV = "./daic_woz_dataset/train_split_Depression_AVEC2017.csv"  # dataset CSV filename
-SOURCE_DIR = "./daic_woz_dataset"  # Directory containing ZIP archives
-TARGET_DIR = "./daic_woz_dataset/train_dataset"  # Extraction destination
-TRANSCRIPT_DIR = "./daic_woz_dataset/train_transcript_dataset"  # Directory for transcript files
+TEST_CSV = ""  # dataset CSV filename
+SOURCE_DIR = ""  # Directory containing ZIP archives
+TARGET_DIR = ""  # Extraction destination
+TRANSCRIPT_DIR = ""  # Directory for transcript files
 
 def normalize_zip_name(participant_id):
     spaced_name = f"{participant_id} P.zip"

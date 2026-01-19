@@ -63,9 +63,9 @@ def process_phq8_dataset(score_csv_path, transcript_folder, output_folder):
             json.dump(result, f, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
-    SCORE_CSV = "./daic_woz_dataset/dev_transcript_dataset/dev_split_Depression_AVEC2017.csv"
-    TRANSCRIPT_DIR = "./daic_woz_dataset/dev_transcript_dataset"
-    OUTPUT_DIR = "./processed_dev_daic_woz"
+    SCORE_CSV = "" # dataset CSV filename
+    TRANSCRIPT_DIR = "" # Directory for transcript files
+    OUTPUT_DIR = "" # Output directory for processed JSON files
 
     process_phq8_dataset(SCORE_CSV, TRANSCRIPT_DIR, OUTPUT_DIR)
     print(f"Processing complete! Results saved to {OUTPUT_DIR} folder")

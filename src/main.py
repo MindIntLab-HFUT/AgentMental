@@ -14,7 +14,7 @@ if __name__ == "__main__":
     initialize_dialog_log()
     logger.info("Psychological assessment program started.")
 
-    data_dir = "../data/processed_train_daic_woz"
+    data_dir = "" # Specify the directory containing the processed JSON files
     if not os.path.exists(data_dir):
         logger.error(f"Data folder {data_dir} does not exist.")
         dialog_print(f"Error: Data folder {data_dir} does not exist.")

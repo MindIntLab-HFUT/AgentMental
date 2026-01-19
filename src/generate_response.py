@@ -9,8 +9,8 @@ from data_load import load_scoring_standards
 from logging_setup import dialog_print
 
 logger = logging.getLogger(__name__)
-base_url = os.getenv("API_BASE_URL", "http://localhost:10010/v1/")
-api_key = os.getenv("API_KEY", "none")
+base_url = os.getenv("API_BASE_URL", "https://api.deepseek.ai/v1")
+api_key = os.getenv("API_KEY", "your_api_key_here")
 model_name = os.getenv("API_MODEL", "deepseek-r1-32b")
 
 

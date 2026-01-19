@@ -24,7 +24,7 @@ def load_real_data(file_path="real_data.json", scale_name="PHQ-8"):
         data = json.load(f)
         identifier = data.get("Participant_ID" if scale_name == "PHQ-8" else "video_name", "unknown_identifier")
         real_interview = data.get("real_interview", [])
-        scores = data.get("phq8_scores" if scale_name == "PHQ-8", {})
+        scores = data.get("phq8_scores" if scale_name == "PHQ-8" else "scores", {})
         return identifier, real_interview, scores
 
 

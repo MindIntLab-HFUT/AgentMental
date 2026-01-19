@@ -1,16 +1,16 @@
 [
     {
         "model": "qwen2.5-72b",
-        "api_key": "none",
-        "base_url": "http://localhost:10012/v1/",
+        "api_key": "your_api_key_here",
+        "base_url": "your_api_base_url_here",
         "api_type": "local",
         "tags": ["qwen2.5-72b", "local"],
         "price": [0, 0]
     },
     {
         "model": "deepseek-r1-32b",
-        "api_key": "none",
-        "base_url": "http://localhost:10010/v1/",
+        "api_key": "your_api_key_here",
+        "base_url": "your_api_base_url_here",
         "api_type": "local",
         "tags": ["deepseek-r1-32b", "local"],
         "price": [0, 0]
